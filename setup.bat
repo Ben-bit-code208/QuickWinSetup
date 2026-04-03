@@ -1,6 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 REM Check if the script is running with administrator privileges
+title Quick Win Setup
 net session >nul 2>&1
 if !errorLevel! == 0 (
     echo Running with administrator privileges.
@@ -9,6 +10,12 @@ if !errorLevel! == 0 (
     pause
     exit /b
 )
+cls
+color 02
+echo ----------------------------------------------------------------------------------------------------
+echo Welcome to Quick Win Setup! This script will help you set up your new Windows installation with ease.
+echo -----------------------------------------------------------------------------------------------------
+echo.
 REM Check if the system already rebooted
 del %AppData%\Microsoft\Windows\Start Menu\Programs\Startup\Setup.bat
 if !errorLevel! == 0 (
@@ -40,6 +47,25 @@ echo updating
 cmd /c winget upgrade --all --accept-source-agreements --accept-package-agreements -h
 cmd /c winget install curl wget
 echo Done!
+:debloat
+echo "Do you want to debloat Windows?"
+set /p debloat="Type yes or no: "
+if /i "%debloat%"=="yes" (
+    REM Check Windows version
+    for /f "tokens=4-5 delims=. " %%i in ('ver') do set VERSION=%%i.%%j
+    if "!VERSION!"=="10.0" (
+        echo Debloating Windows 10...
+        powershell -Command "iwr -useb https://git.io/debloat | iex"
+    ) else (
+        echo Debloating Windows 11...
+        powershell -Command "& ([scriptblock]::Create((irm 'https://win11debloat.raphi.re')))"
+    )
+) else if /i "%debloat%"=="no" (
+    echo Skipping debloat.
+) else (
+    echo Invalid choice.
+    goto debloat
+)
 :Browser_select
  echo "1. None (Microsoft edge)"
  echo "2. Opera GX"
@@ -69,7 +95,7 @@ echo Done!
     echo "do you want a preconfig"
     set /p preconfig="Type yes or no: "
     if /i "%preconfig%"=="yes" (
-        echo "whitch preconfig do you want?
+        echo "which preconfig do you want?"
         echo "1. Gaming"
         echo "2. Work"
         echo "3. School"
@@ -78,7 +104,7 @@ echo Done!
         if "%preconfig_choice%"=="1" (
             echo "You have chosen the Gaming preconfig."
             REM Install gaming related software using winget
-            winget install steam.steam Spotify.Spotify EpicGames.EpicGamesLauncher discord.discord
+            winget install Valve.Steam Spotify.Spotify EpicGames.EpicGamesLauncher discord.discord
             goto browser_select
         ) else if "%preconfig_choice%"=="2" (
             echo "You have chosen the Work preconfig."
@@ -97,7 +123,7 @@ echo Done!
             goto browser_select
         ) else (
             echo "Invalid choice. Please select a valid option."
-            goto preconfig_choice
+            goto preconfig
         )
     ) else if /i "%preconfig%"=="no" (
         echo "You have chosen to not install a preconfig.please select the software you want to install manually."
@@ -138,7 +164,7 @@ echo Done!
             goto browser_select
         ) else if "%software_choice%"=="7" (
             echo "You have chosen to install Steam."
-            winget install steam.steam
+            winget install Valve.Steam
             goto browser_select
         ) else if "%software_choice%"=="8" (
             echo "You have chosen to install Epic Games Launcher."
@@ -155,6 +181,7 @@ echo Done!
     ) else (
         echo "Invalid choice. Please select a valid option."
         goto preconfig
+        )
     )
 
         
