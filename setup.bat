@@ -15,7 +15,20 @@ color 02
 echo ----------------------------------------------------------------------------------------------------
 echo Welcome to Quick Win Setup! This script will help you set up your new Windows installation with ease.
 echo -----------------------------------------------------------------------------------------------------
-echo.
+echo For this the skript MUST be run as administrator and you need to have an active internet connection. The skript will install winget if you don't have it, then it will update winget and other stuff, after that you can choose if you want to debloat windows or not, then you can choose which browser you want to install, after that you can choose if you want a preconfig or not, if you choose to have a preconfig you can choose between gaming, work, school and business, if you choose to not have a preconfig you can select the software you want to install manually.
+echo For this we WILL make a restore point, but we HIGHLY recommend you to make a backup of your important files before running this skript, just in case something goes wrong.
+echo shoutout to @raphi_re for the windows 11 debloat skript(https://github.com/raphire/win11debloat) @Sycnex for the windows 10 Debloat skript (https://github.com/sycnex/windows10debloater) and to @microsoft for winget
+echo all other stuff is owned by the respective owners and is used in this skript with their permission.
+echo and this skript was made by me
+timeout /t 60 /nobreak
+cls
+title Quick Win Setup - Creating restore point
+echo Creating a restore point...
+powershell -Command "Checkpoint-Computer -Description 'Quick Win Setup Restore Point' -RestorePointType 'Modify_Settings'"
+echo Restore point created successfully.
+timeout /t 5 /nobreak >nul
+cls
+title Quick Win Setup - Checking for winget
 REM Check if the system already rebooted
 del %AppData%\Microsoft\Windows\Start Menu\Programs\Startup\Setup.bat
 if !errorLevel! == 0 (
@@ -34,6 +47,7 @@ goto Setup
     goto Setup
  
  ) else (
+    title Quick Win Setup - Installing winget
     echo winget is not installed. Installing winget...
     mkdir "C:\Program Files\winget\install" 2>nul
     powershell -Command "Invoke-WebRequest 'https://github.com/microsoft/winget-cli/releases/download/v1.28.190/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle' -OutFile 'C:\Program Files\winget\install\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle'; Add-AppxPackage -Path 'C:\Program Files\winget\install\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle'"
@@ -43,6 +57,7 @@ goto Setup
    )
 :Setup
 REM First we will update winget and other stuff
+title Quick Win Setup - Updating system
 echo updating
 cmd /c winget upgrade --all --accept-source-agreements --accept-package-agreements -h
 cmd /c winget install curl wget
@@ -52,6 +67,7 @@ echo "Do you want to debloat Windows?"
 set /p debloat="Type yes or no: "
 if /i "%debloat%"=="yes" (
     REM Check Windows version
+    title Quick Win Setup - Debloating Windows
     for /f "tokens=4-5 delims=. " %%i in ('ver') do set VERSION=%%i.%%j
     if "!VERSION!"=="10.0" (
         echo Debloating Windows 10...
@@ -67,6 +83,8 @@ if /i "%debloat%"=="yes" (
     goto debloat
 )
 :Browser_select
+ title Quick Win Setup - Browser selection
+ echo which browser do you want to install?
  echo "1. None (Microsoft edge)"
  echo "2. Opera GX"
  echo "3. Brave"
@@ -77,14 +95,18 @@ if /i "%debloat%"=="yes" (
     echo "You have chosen to not install a browser."
  ) else if "%browserselect%"=="2" (
     echo "You have chosen to install Opera GX."
+    title Quick Win Setup - Installing Opera GX
     winget install Opera.OperaGX
  ) else if "%browserselect%"=="3" (
     echo "You have chosen to install Brave."
+        title Quick Win Setup - Installing Brave
     winget install BraveSoftware.BraveBrowser
  ) else if "%browserselect%"=="4" (
+    title Quick Win Setup - Installing FireFox
     echo "You have chosen to install FireFox."
     winget install Mozilla.Firefox
  ) else if "%browserselect%"=="5" (
+    title Quick Win Setup - Installing Chrome
     echo "You have chosen to install Chrome."
     winget install Google.Chrome
  ) else (
@@ -92,6 +114,8 @@ if /i "%debloat%"=="yes" (
     goto Browser_select
  )
 :preconfig
+
+    title Quick Win Setup - Preconfig selection
     echo "do you want a preconfig"
     set /p preconfig="Type yes or no: "
     if /i "%preconfig%"=="yes" (
@@ -126,6 +150,7 @@ if /i "%debloat%"=="yes" (
             goto preconfig
         )
     ) else if /i "%preconfig%"=="no" (
+        title Quick Win Setup - Manual software selection
         echo "You have chosen to not install a preconfig.please select the software you want to install manually."
         echo "1. Slack"
         echo "2. Zoom"
