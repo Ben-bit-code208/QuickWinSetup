@@ -62,6 +62,34 @@ echo updating
 cmd /c winget upgrade --all --accept-source-agreements --accept-package-agreements -h
 cmd /c winget install curl wget
 echo Done!
+:ESU-hack
+:ltsc_convert
+title Quick Win Setup - LTSC Conversion
+echo do you want to convert your Windows to IoT LTSC 2021? (only windows 10) (support till' 2032)
+echo you need this. a iso: https://buzzheavier.com/yhggy3l1e5oq
+set /p ltsc="Type yes or no: "
+if /i "%ltsc%"=="yes" (
+    echo Wo liegt deine IoT LTSC 2021 ISO?
+    set /p iso_path="Pfad zur ISO (z.B. C:\Users\User\Downloads\iot.iso): "
+    
+    REM Registry ändern
+    title Quick Win Setup - Changing EditionID
+    echo Ändere EditionID...
+    reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v EditionID /t REG_SZ /d "IoTEnterpriseS" /f
+    
+    REM ISO mounten
+    echo Mounte ISO...
+    powershell -Command "Mount-DiskImage -ImagePath '!iso_path!'"
+    
+    REM Laufwerksbuchstaben der ISO finden
+    for /f %%i in ('powershell -Command "(Get-DiskImage -ImagePath '!iso_path!' | Get-Volume).DriveLetter"') do set drive=%%i
+    
+    REM Setup starten
+    echo Starte Upgrade...
+    start "" "!drive!:\setup.exe"
+) else (
+    goto debloat
+)
 :debloat
 echo "Do you want to debloat Windows?"
 set /p debloat="Type yes or no: "
@@ -161,7 +189,8 @@ if /i "%debloat%"=="yes" (
         echo "7. Steam"
         echo "8. Epic Games Launcher"
         echo "9. Discord"
-        echo "10. None"
+        echo "10. Powershell 6"
+        echo "12. Git"
         set /p software_choice="Type the number of the software you want to install: "
         if "%software_choice%"=="1" (
             echo "You have chosen to install Slack."
